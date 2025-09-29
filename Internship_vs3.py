@@ -1,45 +1,4 @@
-'''
-from pathlib import Path
-import os, sys
-
-p = Path("/Users/vinciane/Documents/TUM Biology MSc/Bioinformatics/data_Gastric_NMR.xlsx")
-
-print("Python:", sys.executable)
-print("CWD:", Path.cwd())
-print("Target exists:", p.exists())
-print("Readable:", os.access(p, os.R_OK))
-
-try:
-    with open(p, "rb") as f:
-        f.read(16)
-    print("Open test: OK")
-except Exception as e:
-    print("Open test: FAILED ->", repr(e))
-
-import numpy as np
-
-
-from sklearn.model_selection import train_test_split
-
-import cimcb_lite as cb
-
-print('All packages successfully loaded')
-
-# The path to the input file (Excel spreadsheet)
-filename = '/Users/vinciane/Documents/TUM Biology MSc/Bioinformatics/data_Gastric_NMR.xlsx'
-
-# Load Peak and Data tables into two variables
-dataTable, peakTable = cb.utils.load_dataXL(filename, DataSheet='Data', PeakSheet='Peak') 
-
-
-import numpy
-print("numpy version:", numpy.__version__)
-'''
-
-
-
-
-# %% Load and View 
+ 
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -48,7 +7,7 @@ import cimcb_lite as cb
 print('All packages successfully loaded')
 
 
-# loading Excel table from my folder directly, via venv environment 
+#%% use venv environment 
 filename = "Internship_GastricCancer_NMR.xlsx"
 dataTable, peakTable = cb.utils.load_dataXL(filename, DataSheet="Data", PeakSheet="Peak")
 print("Data shape:", getattr(dataTable, "shape", None))
@@ -75,7 +34,7 @@ print("Number of peaks remaining: {}".format(len(peakTableClean))) #number of pe
 # %% View: peakTableClean
 pd.set_option("display.max_columns", None)
 pd.set_option("display.width", 0)
-peakTableClean.head(20)                    # labels for Hover in PCA loadings plot
+peakTableClean.head(20)                  
 
 
 #%% packages for plotting
@@ -86,7 +45,7 @@ from sklearn.experimental import enable_iterative_imputer  # noqa: F401 (must be
 from sklearn.impute import IterativeImputer
 
 
-#%% Impute with Random Forest + PCA (matplotlib)
+#%% Impute with Random Forest + PCA 
 
 # ---- 1) Feature list from peak table ----
 if "peakTableClean" in globals():
@@ -197,9 +156,9 @@ statsTable.to_excel("stats.xlsx", sheet_name='StatsTable', index=False)
 print("done!")
 
 
-                                               # convert boolean list into to a numpy array
+                                             
 # %% Create a Binary Y vector for stratifiying the samples
-outcomes = dataTable2['Class']                                  # Column that corresponds to Y class (should be 2 groups)
+outcomes = dataTable2['Class']                                  
 Y = [1 if outcome == 'GC' else 0 for outcome in outcomes]       # Change Y into binary (GC = 1, HE = 0)  
 Y = np.array(Y)                                                 # convert boolean list into to a numpy array
 
@@ -211,20 +170,20 @@ print("DataTest = {} samples with {} postive cases.".format(len(Ytest),sum(Ytest
 
 
 # %% Extract and scale the metabolite data from the dataTable
-peaklist = peakTableClean['Name']                           # Set peaklist to the metabolite names in the peakTableClean
-XT = dataTrain[peaklist]                                    # Extract X matrix from DataTrain using peaklist
-XTlog = np.log(XT)                                          # Log scale (base-10)
-XTscale = cb.utils.scale(XTlog, method='auto')              # methods include auto, pareto, vast, and level
-XTknn = cb.utils.knnimpute(XTscale, k=3)                    # missing value imputation (knn - 3 nearest neighbors)
+peaklist = peakTableClean['Name']                           
+XT = dataTrain[peaklist]                                    
+XTlog = np.log(XT)                                         
+XTscale = cb.utils.scale(XTlog, method='auto')              
+XTknn = cb.utils.knnimpute(XTscale, k=3)                    
 
 
 # %% initalise cross_val kfold (stratified) 
-cv = cb.cross_val.kfold(model=cb.model.PLS_SIMPLS,                   # model; we are using the PLS_SIMPLS model
+cv = cb.cross_val.kfold(model=cb.model.PLS_SIMPLS,                   
                         X=XTknn,                                 
                         Y=Ytrain,                               
-                        param_dict={'n_components': [1,2,3,4,5,6]},  # The numbers of latent variables to search                
-                        folds=5,                                     # folds; for the number of splits (k-fold)
-                        bootnum=100)                                 # num bootstraps for the Confidence Intervals
+                        param_dict={'n_components': [1,2,3,4,5,6]},                 
+                        folds=5,                                     
+                        bootnum=100)                                
 
 # run the cross validation
 cv.run()  
@@ -832,5 +791,3 @@ def pretty_pls_eval(scores, y, cutoff=0.5, title_tag="Train", n_boot=800,
 
 pretty_pls_eval(Ypred, Ytrain, cutoff=0.5, title_tag="Train")
 
-
-# %%
